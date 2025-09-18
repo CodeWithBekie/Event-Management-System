@@ -1,0 +1,122 @@
+{% load static %}
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="#" class="brand-link">
+      <img src="{% static 'img/logo.png' %}" alt="Logo" class="brand-image elevation-3"
+           style="opacity: .8">
+          <span class="brand-text font-weight-light">Admin Panel</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Admin Warning -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="info">
+          <div class="alert alert-warning alert-sm">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>ADMINISTRATOR AREA</strong><br>
+            <small>Staff/Admin access only</small>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+          <img src="{% static 'img/user.jpg' %}" class="img-circle elevation-2" alt="User Image">
+        </div>
+        <div class="info">
+          <a href="#" class="d-block">{{ user.username }} (Admin)</a>
+        </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+          <li class="nav-item">
+            <a href="{% url 'dashboard' %}" class="nav-link">
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                Dashboard
+              </p>
+            </a>
+          </li>
+          
+          <!-- Event Categories -->
+          <li class="nav-item has-treeview menu-open">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-folder"></i>
+              <p>
+                Event Categories
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'create-event-category' %}" class="nav-link">
+                  <i class="far fa fa-edit nav-icon"></i>
+                  <p>Create Category</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'event-category-list' %}" class="nav-link">
+                  <i class="far fa fa-list nav-icon"></i>
+                  <p>Manage Categories</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          
+          <!-- Events Management -->
+          <li class="nav-item has-treeview menu-open">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-calendar"></i>
+              <p>
+                Events
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'event-create' %}" class="nav-link">
+                  <i class="far fa fa-edit nav-icon"></i>
+                  <p>Create Event</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'event-list' %}" class="nav-link">
+                  <i class="far fa fa-list nav-icon"></i>
+                  <p>Manage Events</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          
+          <!-- User Registrations -->
+          <li class="nav-item">
+            <a href="{% url 'join-event-list' %}" class="nav-link">
+              <i class="nav-icon fas fa-users"></i>
+              <p>
+                Event Registrations
+              </p>
+            </a>
+          </li>
+          
+          <!-- Public Access -->
+          <li class="nav-item">
+            <a href="{% url 'public-events' %}" class="nav-link">
+              <i class="nav-icon fas fa-globe"></i>
+              <p>
+                View Public Events
+              </p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
