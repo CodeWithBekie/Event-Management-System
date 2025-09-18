@@ -71,13 +71,33 @@ These steps show how to work with Git and GitHub directly in **VS Code**.
 
 ---
 
+### Configure Your Git Identity (Name & Email)
+
+Set your name and email so your commits show correctly in Git history:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your-email@example.com"
+```
+
+> **Tip**: Use the same email as your GitHub account to link commits to your profile.
+
+To check your settings:
+```bash
+git config --list
+```
+
+You can also set these inside VS Code:
+1. Open Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
+2. Search **"Git: Configure User Name and Email"** and follow prompts.
+
+---
+
 ### 1️⃣ Fetch Latest Changes
 Fetch downloads new data from the remote repository without merging:
-- Open VS Code terminal or use the Source Control panel.
-- Run:
-  ```bash
-  git fetch origin
-  ```
+```bash
+git fetch origin
+```
 
 ### 2️⃣ Pull Latest Changes
 Pull fetches and merges the latest changes from the remote branch into your local branch:
