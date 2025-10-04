@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+  {% load static %}
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Event Management | Register</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include 'base/header.html' %}
+  <!-- Font Awesome -->
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- icheck bootstrap -->
+  <link rel="stylesheet" href="../../plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <!-- Theme style -->
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+</head>
+<body class="hold-transition register-page">
+<div class="register-box">
+  <div class="register-logo">
+    <a href="#"><b>Event </b>Registration</a>
+  </div>
+
+  <div class="card">
+    <div class="card-body register-card-body">
+      <p class="login-box-msg">Register a new membership</p>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-success">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form action="" method="post">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+          {{ form.username }}
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-user"></span>
+            </div>
+          </div>
+        </div>
+        {% if form.username.errors %}
+          <div class="alert alert-danger">
+            {{ form.username.errors }}
+          </div>
+        {% endif %}
+
+        <div class="input-group mb-3">
+          {{ form.email }}
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-envelope"></span>
+            </div>
+          </div>
+        </div>
+        {% if form.email.errors %}
+          <div class="alert alert-danger">
+            {{ form.email.errors }}
+          </div>
+        {% endif %}
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="input-group mb-3">
+              {{ form.first_name }}
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <span class="fas fa-user"></span>
+                </div>
+              </div>
+            </div>
+            {% if form.first_name.errors %}
+              <div class="alert alert-danger">
+                {{ form.first_name.errors }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <div class="input-group mb-3">
+              {{ form.last_name }}
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <span class="fas fa-user"></span>
+                </div>
+              </div>
+            </div>
+            {% if form.last_name.errors %}
+              <div class="alert alert-danger">
+                {{ form.last_name.errors }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="input-group mb-3">
+          {{ form.password1 }}
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
+        </div>
+        {% if form.password1.errors %}
+          <div class="alert alert-danger">
+            {{ form.password1.errors }}
+          </div>
+        {% endif %}
+        
+        <div class="input-group mb-3">
+          {{ form.password2 }}
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
+        </div>
+        {% if form.password2.errors %}
+          <div class="alert alert-danger">
+            {{ form.password2.errors }}
+          </div>
+        {% endif %}
+        
+        <div class="row">
+          <div class="col-8">
+            <div class="icheck-primary">
+              <input type="checkbox" id="agreeTerms" name="terms" value="agree" required>
+              <label for="agreeTerms">
+               I agree to the <a href="#">terms</a>
+              </label>
+            </div>
+          </div>
+          <!-- /.col -->
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
+          </div>
+          <!-- /.col -->
+        </div>
+      </form>
+
+      <a href="{% url 'login' %}" class="text-center">I already have a membership</a>
+    </div>
+    <!-- /.form-box -->
+  </div><!-- /.card -->
+</div>
+<!-- /.register-box -->
+
+{% include 'base/js.html' %}
+
+<script>
+  // Add placeholders and CSS classes to form fields
+  const fields = [
+    { id: 'id_username', placeholder: 'Username' },
+    { id: 'id_email', placeholder: 'Email Address' },
+    { id: 'id_first_name', placeholder: 'First Name (Optional)' },
+    { id: 'id_last_name', placeholder: 'Last Name (Optional)' },
+    { id: 'id_password1', placeholder: 'Password' },
+    { id: 'id_password2', placeholder: 'Confirm Password' }
+  ];
+
+  fields.forEach(field => {
+    const element = document.getElementById(field.id);
+    if (element) {
+      element.placeholder = field.placeholder;
+      element.className = 'form-control';
+    }
+  });
+</script>
+
+</body>
+</html>
