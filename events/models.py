@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.contrib.auth.models import User
 
 
 class EventCategory(models.Model):
@@ -66,6 +67,24 @@ class Event(models.Model):
     def __str__(self):
         return self.name
     
+    def get_registration_count(self):
+        """Return the count of users who are registered (waiting or attending) for this event"""
+        return self.eventmember_set.filter(
+            attend_status__in=['waiting', 'attending']
+        ).count()
+
+    def get_available_slots(self):
+        """Return the number of available slots remaining for this event"""
+        if self.maximum_attende:
+            return self.maximum_attende - self.get_registration_count()
+        return None
+
+    def is_full(self):
+        """Check if the event has reached maximum capacity"""
+        if self.maximum_attende:
+            return self.get_registration_count() >= self.maximum_attende
+        return False
+
     def get_absolute_url(self):
         return reverse('event-list')
     
@@ -194,6 +213,72 @@ class UserCoin(models.Model):
     
     def get_absolute_url(self):
         return reverse('dashboard')
+
+
+class AdminMessage(models.Model):
+    """Model for users to send messages to administrators"""
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_admin_messages')
+    sender_email = models.EmailField()
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    user_agent = models.TextField(blank=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    responded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='responded_admin_messages')
+    response = models.TextField(blank=True, null=True)
+    response_date = models.DateTimeField(blank=True, null=True)
+    
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'), 
+        ('resolved', 'Resolved'),
+        ('closed', 'Closed'),
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
+    class Meta:
+        ordering = ['-created_date']
+
+    def __str__(self):
+        return f"Message from {self.sender.username if self.sender else self.sender_email} - {self.subject}"
+
+    def get_absolute_url(self):
+        return reverse('admin-message-detail', kwargs={'pk': self.pk})
+
+
+class EventComment(models.Model):
+    """Model for users to comment on events"""
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='event_comments')
+    comment = models.TextField()
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    is_approved = models.BooleanField(default=True)  # Auto-approve by default, can be changed for moderation
+    
+    # Optional: Parent comment for replies
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    
+    STATUS_CHOICES = (
+        ('active', 'Active'),
+        ('hidden', 'Hidden'),
+        ('deleted', 'Deleted'),
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+
+    class Meta:
+        ordering = ['-created_date']
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.event.name}"
+
+    def get_replies(self):
+        """Get all replies to this comment"""
+        return self.replies.filter(status='active').order_by('created_date')
+
+    def is_reply(self):
+        """Check if this comment is a reply to another comment"""
+        return self.parent is not None
 
 
 
