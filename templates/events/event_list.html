@@ -25,6 +25,7 @@
                                 <th>#</th>
                                 <th>Name</th>
                                 <th>Category</th>
+                                <th>Registration</th>
                                 <th class="event_image">Image</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -36,6 +37,14 @@
                                   <td>{{ forloop.counter }}</td>
                                   <td>{{ event.name }}</td>
                                   <td>{{ event.category }}</td>
+                                  <td>
+                                      <span class="badge badge-{% if event.is_full %}danger{% else %}info{% endif %}">
+                                        {{ event.get_registration_count }}/{{ event.maximum_attende }}
+                                      </span>
+                                      {% if event.is_full %}
+                                        <br><span class="badge badge-warning mt-1">FULL</span>
+                                      {% endif %}
+                                  </td>
                                   <td class="event_image">
                                       <img class="event_image" src="{{ event.eventimage.image.url }}" alt="Image" height="100px" width="100px">
                                   </td>

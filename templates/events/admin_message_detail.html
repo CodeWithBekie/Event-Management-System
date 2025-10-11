@@ -1,0 +1,135 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Message Details{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">Message Details</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'admin-message-list' %}">Messages</a></li>
+                        <li class="breadcrumb-item active">Details</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <!-- Message Details Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">{{ message.subject }}</h3>
+                            <div class="card-tools">
+                                {% if message.status == 'pending' %}
+                                    <span class="badge badge-warning">Pending</span>
+                                {% elif message.status == 'in_progress' %}
+                                    <span class="badge badge-info">In Progress</span>
+                                {% elif message.status == 'resolved' %}
+                                    <span class="badge badge-success">Resolved</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Closed</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>From:</strong>
+                                    {% if message.sender %}
+                                        {{ message.sender.get_full_name|default:message.sender.username }}
+                                    {% else %}
+                                        Anonymous User
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Email:</strong> {{ message.sender_email }}
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <strong>Date:</strong> {{ message.created_date|date:"F d, Y H:i" }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>IP Address:</strong> {{ message.ip_address|default:"Not recorded" }}
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="message-content">
+                                <strong>Message:</strong>
+                                <div class="mt-2 p-3 bg-light rounded">
+                                    {{ message.message|linebreaks }}
+                                </div>
+                            </div>
+
+                            {% if message.response %}
+                                <hr>
+                                <div class="response-content">
+                                    <strong>Response by {{ message.responded_by.get_full_name|default:message.responded_by.username }}:</strong>
+                                    <small class="text-muted">({{ message.response_date|date:"F d, Y H:i" }})</small>
+                                    <div class="mt-2 p-3 bg-success bg-opacity-10 rounded border-left border-success">
+                                        {{ message.response|linebreaks }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Response Form -->
+                    {% if not message.response or message.status != 'closed' %}
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Send Response</h3>
+                            </div>
+                            <div class="card-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="{{ response_form.response.id_for_label }}">Response:</label>
+                                        {{ response_form.response }}
+                                        {% if response_form.response.errors %}
+                                            <div class="text-danger">
+                                                {{ response_form.response.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="{{ response_form.status.id_for_label }}">Status:</label>
+                                        {{ response_form.status }}
+                                        {% if response_form.status.errors %}
+                                            <div class="text-danger">
+                                                {{ response_form.status.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane"></i> Send Response
+                                        </button>
+                                        <a href="{% url 'admin-message-list' %}" class="btn btn-secondary">
+                                            <i class="fas fa-arrow-left"></i> Back to Messages
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

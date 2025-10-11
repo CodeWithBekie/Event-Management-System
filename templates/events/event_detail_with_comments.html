@@ -1,0 +1,235 @@
+{% extends 'base/user_base.html' %}
+
+{% block title %}{{ event.name }} - Details{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">{{ event.name }}</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{% url 'public-events' %}">Events</a></li>
+                    <li class="breadcrumb-item active">{{ event.name }}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+            <div class="row">
+                <!-- Event Details -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Event Details</h3>
+                            <div class="card-tools">
+                                {% if event.status == 'active' %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ event.get_status_display }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Category:</strong> {{ event.category.name }}</p>
+                                    <p><strong>Venue:</strong> {{ event.venue }}</p>
+                                    <p><strong>Location:</strong> {{ event.location|default:"TBA" }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Start Date:</strong> {{ event.start_date|date:"F d, Y" }}</p>
+                                    <p><strong>End Date:</strong> {{ event.end_date|date:"F d, Y" }}</p>
+                                    <p><strong>Points:</strong> {{ event.points }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h5>Description</h5>
+                                    <p>{{ event.description|linebreaks }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Registration Info -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-users"></i>
+                                        <strong>Registration:</strong> 
+                                        {{ event.get_registration_count }} / {{ event.maximum_attende }} registered
+                                        {% if event.get_available_slots %}
+                                            ({{ event.get_available_slots }} slots remaining)
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Registration Button -->
+                            {% if user.is_authenticated and not user.is_staff %}
+                                <div class="text-center">
+                                    {% if is_registered %}
+                                        <button class="btn btn-success" disabled>
+                                            <i class="fas fa-check"></i> Already Registered
+                                        </button>
+                                    {% elif event.is_full %}
+                                        <button class="btn btn-danger" disabled>
+                                            <i class="fas fa-times"></i> Event Full
+                                        </button>
+                                    {% else %}
+                                        <a href="{% url 'join-event' event.id %}" class="btn btn-primary">
+                                            <i class="fas fa-plus"></i> Register for Event
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-comments"></i> Comments ({{ comments.count }})
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Add Comment Form -->
+                            {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'add-event-comment' event.id %}" class="mb-4">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="{{ comment_form.comment.id_for_label }}">Add your comment:</label>
+                                        {{ comment_form.comment }}
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-paper-plane"></i> Post Comment
+                                    </button>
+                                </form>
+                                <hr>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <a href="{% url 'login' %}">Login</a> to post comments.
+                                </div>
+                            {% endif %}
+
+                            <!-- Display Comments -->
+                            {% if comments %}
+                                {% for comment in comments %}
+                                    <div class="comment mb-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <strong>{{ comment.user.get_full_name|default:comment.user.username }}</strong>
+                                                        <small class="text-muted">{{ comment.created_date|date:"M d, Y H:i" }}</small>
+                                                    </div>
+                                                </div>
+                                                <p class="mt-2 mb-0">{{ comment.comment|linebreaks }}</p>
+                                                
+                                                {% if user.is_authenticated %}
+                                                    <div class="mt-2">
+                                                        <button class="btn btn-sm btn-outline-primary reply-btn" data-comment-id="{{ comment.id }}">
+                                                            <i class="fas fa-reply"></i> Reply
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <!-- Reply Form (hidden by default) -->
+                                                    <div class="reply-form mt-3" id="reply-form-{{ comment.id }}" style="display: none;">
+                                                        <form method="post" action="{% url 'reply-to-comment' comment.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="form-group">
+                                                                <textarea name="comment" class="form-control" rows="2" placeholder="Write a reply..." required></textarea>
+                                                            </div>
+                                                            <button type="submit" class="btn btn-sm btn-primary">Post Reply</button>
+                                                            <button type="button" class="btn btn-sm btn-secondary cancel-reply">Cancel</button>
+                                                        </form>
+                                                    </div>
+                                                {% endif %}
+
+                                                <!-- Display Replies -->
+                                                {% for reply in comment.get_replies %}
+                                                    <div class="reply ml-4 mt-3">
+                                                        <div class="card bg-light">
+                                                            <div class="card-body py-2">
+                                                                <div class="d-flex justify-content-between align-items-start">
+                                                                    <div>
+                                                                        <strong>{{ reply.user.get_full_name|default:reply.user.username }}</strong>
+                                                                        <small class="text-muted">{{ reply.created_date|date:"M d, Y H:i" }}</small>
+                                                                    </div>
+                                                                </div>
+                                                                <p class="mt-1 mb-0">{{ reply.comment|linebreaks }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-comments fa-3x mb-3"></i>
+                                    <p>No comments yet. Be the first to share your thoughts!</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Image -->
+                <div class="col-md-4">
+                    {% if event.eventimage %}
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <img src="{{ event.eventimage.image.url }}" alt="{{ event.name }}" class="img-fluid rounded">
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Quick Info -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Quick Info</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-calendar text-primary"></i> <strong>Duration:</strong> {{ event.start_date|date:"M d" }} - {{ event.end_date|date:"M d, Y" }}</li>
+                                <li><i class="fas fa-map-marker-alt text-danger"></i> <strong>Venue:</strong> {{ event.venue }}</li>
+                                <li><i class="fas fa-users text-info"></i> <strong>Max Attendees:</strong> {{ event.maximum_attende }}</li>
+                                <li><i class="fas fa-star text-warning"></i> <strong>Points:</strong> {{ event.points }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle reply button clicks
+    document.querySelectorAll('.reply-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const commentId = this.getAttribute('data-comment-id');
+            const replyForm = document.getElementById('reply-form-' + commentId);
+            replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+
+    // Handle cancel reply
+    document.querySelectorAll('.cancel-reply').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            this.closest('.reply-form').style.display = 'none';
+        });
+    });
+});
+</script>
+{% endblock %}
