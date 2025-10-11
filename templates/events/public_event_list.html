@@ -51,6 +51,16 @@
               <i class="fas fa-user"></i> My Dashboard
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'send-admin-message' %}">
+              <i class="fas fa-envelope"></i> Contact Admin
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'user-messages' %}">
+              <i class="fas fa-inbox"></i> My Messages
+            </a>
+          </li>
         {% endif %}
       {% endif %}
     </ul>
@@ -142,16 +152,31 @@
                   <strong>Category:</strong> {{ event.category.name }}<br>
                   <strong>Date:</strong> {{ event.start_date }} to {{ event.end_date }}<br>
                   <strong>Venue:</strong> {{ event.venue }}<br>
-                  <strong>Status:</strong> <span class="badge badge-{{ event.scheduled_status|yesno:'success,warning' }}">{{ event.get_scheduled_status_display }}</span>
+                  <strong>Status:</strong> <span class="badge badge-{{ event.scheduled_status|yesno:'success,warning' }}">{{ event.get_scheduled_status_display }}</span><br>
+                  <strong>Registration:</strong> 
+                  <span class="badge badge-{% if event.is_full %}danger{% else %}info{% endif %}">
+                    {{ event.get_registration_count }}/{{ event.maximum_attende }} registered
+                  </span>
+                  {% if event.is_full %}
+                    <span class="badge badge-warning ml-1">FULL</span>
+                  {% elif event.get_available_slots <= 5 and event.get_available_slots > 0 %}
+                    <span class="badge badge-warning ml-1">{{ event.get_available_slots }} slots left</span>
+                  {% endif %}
                 </p>
                 <div class="d-flex justify-content-between">
                   <a href="{% url 'public-event-detail' event.pk %}" class="btn btn-primary btn-sm">
                     <i class="fas fa-info-circle"></i> Details
                   </a>
                   {% if user.is_authenticated %}
-                    <a href="{% url 'join-event' event.id %}" class="btn btn-success btn-sm">
-                      <i class="fas fa-user-plus"></i> Join Event
-                    </a>
+                    {% if event.is_full %}
+                      <button class="btn btn-secondary btn-sm" disabled>
+                        <i class="fas fa-ban"></i> Event Full
+                      </button>
+                    {% else %}
+                      <a href="{% url 'join-event' event.id %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-user-plus"></i> Join Event
+                      </a>
+                    {% endif %}
                   {% else %}
                     <a href="{% url 'login' %}" class="btn btn-outline-success btn-sm">
                       <i class="fas fa-sign-in-alt"></i> Login to Join

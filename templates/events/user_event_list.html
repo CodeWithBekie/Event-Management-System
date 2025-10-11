@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+{% load static %}
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>My Events - Event Management</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include 'base/header.html' %}
+  <!-- Font Awesome -->
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Theme style -->
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'user-dashboard' %}">
+          <i class="fas fa-home"></i> My Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'public-events' %}">
+          <i class="fas fa-calendar"></i> Browse Events
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="{% url 'user-events' %}">
+          <i class="fas fa-list"></i> My Events
+        </a>
+      </li>
+    </ul>
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+          <i class="fas fa-user"></i> {{ user.username }}
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="{% url 'logout' %}">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </div>
+      </li>
+    </ul>
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper" style="margin-left: 0;">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>My Events</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{% url 'user-dashboard' %}">Home</a></li>
+              <li class="breadcrumb-item active">My Events</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible">
+              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <!-- Quick Actions -->
+        <div class="row mb-3">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <a href="{% url 'public-events' %}" class="btn btn-primary">
+                      <i class="fas fa-search"></i> Browse More Events
+                    </a>
+                  </div>
+                  <div class="col-md-6 text-right">
+                    <span class="badge badge-info">
+                      <i class="fas fa-calendar-check"></i> 
+                      Total Registered Events: {{ user_events.count }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Registered Events -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-calendar-check mr-2"></i>
+                  My Event Registrations
+                </h3>
+              </div>
+              <div class="card-body">
+                {% if user_events %}
+                  <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Event Name</th>
+                          <th>Category</th>
+                          <th>Start Date</th>
+                          <th>End Date</th>
+                          <th>Venue</th>
+                          <th>Event Status</th>
+                          <th>My Status</th>
+                          <th>Attendance</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for registration in user_events %}
+                        <tr>
+                          <td>{{ forloop.counter }}</td>
+                          <td>
+                            <strong>{{ registration.event.name }}</strong>
+                            {% if registration.event.description %}
+                              <br><small class="text-muted">{{ registration.event.description|truncatechars:50 }}</small>
+                            {% endif %}
+                          </td>
+                          <td>
+                            <span class="badge badge-secondary">{{ registration.event.category.name }}</span>
+                          </td>
+                          <td>{{ registration.event.start_date|date:"M d, Y" }}</td>
+                          <td>{{ registration.event.end_date|date:"M d, Y" }}</td>
+                          <td>{{ registration.event.venue|truncatechars:30 }}</td>
+                          <td>
+                            {% if registration.event.status == 'active' %}
+                              <span class="badge badge-success">{{ registration.event.get_status_display }}</span>
+                            {% elif registration.event.status == 'completed' %}
+                              <span class="badge badge-info">{{ registration.event.get_status_display }}</span>
+                            {% else %}
+                              <span class="badge badge-warning">{{ registration.event.get_status_display }}</span>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if registration.status == 'active' %}
+                              <span class="badge badge-success">Registered</span>
+                            {% else %}
+                              <span class="badge badge-secondary">{{ registration.status|title }}</span>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if registration.attend_status %}
+                              <span class="badge badge-success">
+                                <i class="fas fa-check"></i> Attended
+                              </span>
+                            {% else %}
+                              <span class="badge badge-warning">
+                                <i class="fas fa-clock"></i> Not Attended
+                              </span>
+                            {% endif %}
+                          </td>
+                          <td>
+                            <div class="btn-group">
+                              <a href="{% url 'public-event-detail' registration.event.pk %}" 
+                                 class="btn btn-sm btn-primary" 
+                                 title="View Event Details">
+                                <i class="fas fa-eye"></i>
+                              </a>
+                              {% if registration.event.status == 'active' and registration.status == 'active' %}
+                                <a href="{% url 'remove-event-member' registration.pk %}" 
+                                   class="btn btn-sm btn-danger" 
+                                   title="Unregister from Event"
+                                   onclick="return confirm('Are you sure you want to unregister from this event?')">
+                                  <i class="fas fa-times"></i>
+                                </a>
+                              {% endif %}
+                            </div>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                    <h4>No Events Registered</h4>
+                    <p class="text-muted mb-4">You haven't registered for any events yet. Browse our available events and register for the ones that interest you!</p>
+                    <a href="{% url 'public-events' %}" class="btn btn-primary btn-lg">
+                      <i class="fas fa-search mr-2"></i> Browse Available Events
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <!-- Main Footer -->
+  <footer class="main-footer" style="margin-left: 0;">
+    <div class="float-right d-none d-sm-block">
+      <b>Version</b> 1.0.0
+    </div>
+    <strong>Copyright &copy; 2025 Event Management System.</strong> All rights reserved.
+  </footer>
+</div>
+<!-- ./wrapper -->
+
+{% include 'base/js.html' %}
+
+<!-- Bootstrap JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

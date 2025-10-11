@@ -35,10 +35,12 @@ from .models import (
     EventUserWishList,
     UserCoin,
     EventImage,
-    EventAgenda
+    EventAgenda,
+    AdminMessage,
+    EventComment
 
 )
-from .forms import EventForm, EventImageForm, EventAgendaForm, EventCreateMultiForm
+from .forms import EventForm, EventImageForm, EventAgendaForm, EventCreateMultiForm, AdminMessageForm, AdminMessageResponseForm, EventCommentForm, ContactForm
 
 
 # ADMIN-ONLY VIEWS - Event Category Management
@@ -460,10 +462,9 @@ def join_event(request, event_id):
     if existing_member:
         messages.warning(request, 'You are already registered for this event.')
     else:
-        # Check if event is full
-        current_members = EventMember.objects.filter(event=event, status='active').count()
-        if current_members >= event.maximum_attende:
-            messages.error(request, 'This event is full. Registration closed.')
+        # Check if event is full using our new method
+        if event.is_full():
+            messages.error(request, f'This event is full. Registration closed. ({event.get_registration_count()}/{event.maximum_attende} registered)')
         else:
             # Register user for event
             EventMember.objects.create(
@@ -474,7 +475,9 @@ def join_event(request, event_id):
                 created_user=request.user,
                 updated_user=request.user
             )
-            messages.success(request, f'Successfully registered for {event.name}!')
+            # Show updated count after registration
+            new_count = event.get_registration_count() + 1  # +1 because we just added one
+            messages.success(request, f'Successfully registered for {event.name}! ({new_count}/{event.maximum_attende} registered)')
     
     return redirect('public-event-detail', pk=event.id)
 
@@ -493,3 +496,169 @@ def public_search_events(request):
         'search_query': request.POST.get('search', '') if request.method == 'POST' else ''
     }
     return render(request, 'events/public_event_list.html', context)
+
+
+# ADMIN MESSAGES VIEWS
+class AdminMessageListView(AdminRequiredMixin, ListView):
+    """View for administrators to see all messages from users"""
+    model = AdminMessage
+    template_name = 'events/admin_message_list.html'
+    context_object_name = 'messages'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return AdminMessage.objects.all().select_related('sender', 'responded_by')
+
+
+class AdminMessageDetailView(AdminRequiredMixin, DetailView):
+    """View for administrators to see message details and respond"""
+    model = AdminMessage
+    template_name = 'events/admin_message_detail.html'
+    context_object_name = 'message'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['response_form'] = AdminMessageResponseForm(instance=self.object)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = AdminMessageResponseForm(request.POST, instance=self.object)
+        
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.responded_by = request.user
+            from django.utils import timezone
+            message.response_date = timezone.now()
+            message.is_read = True
+            message.save()
+            messages.success(request, 'Response sent successfully!')
+            return redirect('admin-message-detail', pk=self.object.pk)
+        
+        context = self.get_context_data()
+        context['response_form'] = form
+        return self.render_to_response(context)
+
+
+@login_required
+def send_admin_message(request):
+    """View for users to send messages to administrators"""
+    if request.method == 'POST':
+        form = AdminMessageForm(request.POST, user=request.user)
+        if form.is_valid():
+            # Get client IP and user agent for tracking
+            ip = request.META.get('REMOTE_ADDR')
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+            
+            message = form.save(commit=False)
+            message.ip_address = ip
+            message.user_agent = user_agent
+            message.save()
+            
+            messages.success(request, 'Your message has been sent to the administrators. We will respond as soon as possible.')
+            return redirect('send-admin-message')
+    else:
+        form = AdminMessageForm(user=request.user)
+    
+    return render(request, 'events/send_admin_message.html', {'form': form})
+
+
+def contact_admin(request):
+    """View for anonymous users to contact admins"""
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            # Create AdminMessage from contact form
+            ip = request.META.get('REMOTE_ADDR')
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+            
+            AdminMessage.objects.create(
+                sender=request.user if request.user.is_authenticated else None,
+                sender_email=form.cleaned_data['email'],
+                subject=form.cleaned_data['subject'],
+                message=f"Name: {form.cleaned_data['name']}\nEmail: {form.cleaned_data['email']}\n\nMessage:\n{form.cleaned_data['message']}",
+                ip_address=ip,
+                user_agent=user_agent
+            )
+            
+            messages.success(request, 'Your message has been sent successfully. We will respond to your email address.')
+            return redirect('contact-admin')
+    else:
+        form = ContactForm()
+    
+    return render(request, 'events/contact_admin.html', {'form': form})
+
+
+# EVENT COMMENTS VIEWS
+class EventDetailWithCommentsView(DetailView):
+    """Enhanced event detail view with comments"""
+    model = Event
+    template_name = 'events/event_detail_with_comments.html'
+    context_object_name = 'event'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        event = self.get_object()
+        
+        # Get comments for this event
+        comments = EventComment.objects.filter(
+            event=event, 
+            status='active', 
+            parent=None
+        ).select_related('user').prefetch_related('replies')
+        
+        context['comments'] = comments
+        context['comment_form'] = EventCommentForm()
+        
+        # Check if user is registered for this event
+        if self.request.user.is_authenticated:
+            context['is_registered'] = EventMember.objects.filter(
+                event=event, 
+                user=self.request.user,
+                attend_status__in=['waiting', 'attending']
+            ).exists()
+        
+        return context
+
+
+@login_required
+def add_event_comment(request, event_id):
+    """View to add a comment to an event"""
+    event = get_object_or_404(Event, id=event_id)
+    
+    if request.method == 'POST':
+        form = EventCommentForm(request.POST, user=request.user, event=event)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your comment has been added successfully!')
+        else:
+            messages.error(request, 'There was an error adding your comment.')
+    
+    return redirect('event-detail-with-comments', pk=event_id)
+
+
+@login_required
+def reply_to_comment(request, comment_id):
+    """View to reply to a comment"""
+    parent_comment = get_object_or_404(EventComment, id=comment_id)
+    
+    if request.method == 'POST':
+        form = EventCommentForm(request.POST, user=request.user, event=parent_comment.event, parent=parent_comment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your reply has been added successfully!')
+        else:
+            messages.error(request, 'There was an error adding your reply.')
+    
+    return redirect('event-detail-with-comments', pk=parent_comment.event.id)
+
+
+class UserMessagesView(LoginRequiredMixin, ListView):
+    """View for users to see their sent messages"""
+    model = AdminMessage
+    template_name = 'events/user_messages.html'
+    context_object_name = 'messages'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return AdminMessage.objects.filter(sender=self.request.user)

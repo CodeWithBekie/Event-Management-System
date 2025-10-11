@@ -1,0 +1,215 @@
+{% extends 'base/user_base.html' %}
+
+{% block title %}My Messages{% endblock %}
+
+{% block extrahead %}
+<style>
+.message-content {
+    background-color: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 15px;
+    margin: 10px 0;
+}
+
+.admin-response {
+    background-color: #d4edda;
+    border-left: 4px solid #28a745;
+    padding: 15px;
+    margin: 10px 0;
+}
+
+.response-header {
+    color: #155724;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.message-details-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">My Messages</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{% url 'user-dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">My Messages</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Messages I've Sent to Administrators</h3>
+                        <div class="card-tools">
+                            <a href="{% url 'send-admin-message' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus"></i> Send New Message
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Subject</th>
+                                            <th>Status</th>
+                                            <th>Sent Date</th>
+                                            <th>Response Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for message in messages %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ message.subject }}</strong>
+                                                    {% if not message.is_read %}
+                                                        <span class="badge badge-primary ml-1">New</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if message.status == 'pending' %}
+                                                        <span class="badge badge-warning">Pending</span>
+                                                    {% elif message.status == 'in_progress' %}
+                                                        <span class="badge badge-info">In Progress</span>
+                                                    {% elif message.status == 'resolved' %}
+                                                        <span class="badge badge-success">Resolved</span>
+                                                    {% else %}
+                                                        <span class="badge badge-secondary">Closed</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ message.created_date|date:"M d, Y H:i" }}</td>
+                                                <td>
+                                                    {% if message.response %}
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-check"></i> Responded
+                                                        </span>
+                                                        <br>
+                                                        <small class="text-muted">{{ message.response_date|date:"M d, Y H:i" }}</small>
+                                                    {% else %}
+                                                        <span class="badge badge-secondary">
+                                                            <i class="fas fa-clock"></i> Waiting
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary" type="button" data-toggle="collapse" data-target="#messageDetails{{ message.id }}" aria-expanded="false">
+                                                        <i class="fas fa-eye"></i> View Details
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <!-- Message Details Row (Collapsible) -->
+                                            <tr>
+                                                <td colspan="5" class="p-0">
+                                                    <div class="collapse" id="messageDetails{{ message.id }}">
+                                                        <div class="card message-details-card m-3">
+                                                            <div class="card-body">
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        <h6><i class="fas fa-envelope text-primary"></i> Your Message:</h6>
+                                                                        <div class="message-content">
+                                                                            {{ message.message|linebreaks }}
+                                                                        </div>
+                                                                        
+                                                                        {% if message.response %}
+                                                                            <h6 class="mt-4"><i class="fas fa-reply text-success"></i> Admin Response:</h6>
+                                                                            <div class="admin-response">
+                                                                                <div class="response-header d-flex justify-content-between">
+                                                                                    <span>
+                                                                                        <i class="fas fa-user-shield"></i>
+                                                                                        {{ message.responded_by.get_full_name|default:message.responded_by.username }}
+                                                                                    </span>
+                                                                                    <span>
+                                                                                        <i class="fas fa-clock"></i>
+                                                                                        {{ message.response_date|date:"F d, Y \a\t H:i" }}
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div class="response-content">
+                                                                                    {{ message.response|linebreaks }}
+                                                                                </div>
+                                                                            </div>
+                                                                        {% else %}
+                                                                            <div class="alert alert-info mt-4">
+                                                                                <i class="fas fa-info-circle"></i>
+                                                                                <strong>Status:</strong> We have received your message and will respond as soon as possible.
+                                                                                <br>
+                                                                                <small class="text-muted">You will be able to see the admin response here once they reply.</small>
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            {% if is_paginated %}
+                                <div class="d-flex justify-content-center mt-3">
+                                    <nav aria-label="Page navigation">
+                                        <ul class="pagination">
+                                            {% if page_obj.has_previous %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                                                </li>
+                                            {% endif %}
+
+                                            {% for num in page_obj.paginator.page_range %}
+                                                {% if page_obj.number == num %}
+                                                    <li class="page-item active">
+                                                        <span class="page-link">{{ num }}</span>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                                    </li>
+                                                {% endif %}
+                                            {% endfor %}
+
+                                            {% if page_obj.has_next %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-center">
+                                <i class="fas fa-envelope fa-3x text-muted mb-3"></i>
+                                <h4>No Messages Sent</h4>
+                                <p>You haven't sent any messages to administrators yet.</p>
+                                <a href="{% url 'send-admin-message' %}" class="btn btn-primary">
+                                    <i class="fas fa-envelope"></i> Send Your First Message
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

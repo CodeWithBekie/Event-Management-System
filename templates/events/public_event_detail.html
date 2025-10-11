@@ -51,6 +51,16 @@
               <i class="fas fa-user"></i> My Dashboard
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'send-admin-message' %}">
+              <i class="fas fa-envelope"></i> Contact Admin
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'user-messages' %}">
+              <i class="fas fa-inbox"></i> My Messages
+            </a>
+          </li>
         {% endif %}
       {% endif %}
     </ul>
@@ -177,6 +187,19 @@
                         <td>{{ event.maximum_attende }}</td>
                       </tr>
                       <tr>
+                        <td><strong>Current Registration:</strong></td>
+                        <td>
+                          <span class="badge badge-{% if event.is_full %}danger{% else %}info{% endif %}">
+                            {{ event.get_registration_count }}/{{ event.maximum_attende }} registered
+                          </span>
+                          {% if event.is_full %}
+                            <span class="badge badge-warning ml-1">FULL</span>
+                          {% elif event.get_available_slots <= 5 and event.get_available_slots > 0 %}
+                            <span class="badge badge-warning ml-1">{{ event.get_available_slots }} slots left</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                      <tr>
                         <td><strong>Points:</strong></td>
                         <td>{{ event.points }}</td>
                       </tr>
@@ -270,13 +293,19 @@
               </div>
               <div class="card-body">
                 <div class="row">
-                  <div class="col-6 text-center">
+                  <div class="col-4 text-center">
+                    <div class="info-box-content">
+                      <span class="info-box-text">Registered</span>
+                      <span class="info-box-number text-{% if event.is_full %}danger{% else %}info{% endif %}">{{ event.get_registration_count }}</span>
+                    </div>
+                  </div>
+                  <div class="col-4 text-center">
                     <div class="info-box-content">
                       <span class="info-box-text">Capacity</span>
                       <span class="info-box-number">{{ event.maximum_attende }}</span>
                     </div>
                   </div>
-                  <div class="col-6 text-center">
+                  <div class="col-4 text-center">
                     <div class="info-box-content">
                       <span class="info-box-text">Points</span>
                       <span class="info-box-number">{{ event.points }}</span>

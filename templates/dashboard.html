@@ -150,6 +150,7 @@
                             <th>#</th>
                             <th>Name</th>
                             <th>Category</th>
+                            <th>Registration</th>
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Venue</th>
@@ -163,6 +164,14 @@
                               <td>{{ forloop.counter }}</td>
                               <td>{{ event.name|capfirst }}</td>
                               <td>{{ event.category }}</td>
+                              <td>
+                                  <span class="badge badge-{% if event.is_full %}danger{% else %}info{% endif %}">
+                                    {{ event.get_registration_count }}/{{ event.maximum_attende }}
+                                  </span>
+                                  {% if event.is_full %}
+                                    <br><small class="text-warning">FULL</small>
+                                  {% endif %}
+                              </td>
                               <td>{{ event.start_date }}</td>
                               <td>{{ event.end_date }}</td>
                               <td>{{ event.venue|capfirst }}</td>
