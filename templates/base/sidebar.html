@@ -1,0 +1,89 @@
+{% load static %}
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+          <i class="fas fa-user-circle fa-2x text-light"></i>
+        </div>
+        <div class="info">
+          <a href="#" class="d-block">{{ user.username }} (Admin)</a>
+        </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li class="nav-item">
+            <a href="{% url 'dashboard' %}" class="nav-link">
+              <p>Dashboard</p>
+            </a>
+          </li>
+          
+          <!-- Event Categories -->
+          <li class="nav-item has-treeview menu-open">
+            <a href="#" class="nav-link">
+              <p>
+                Event Categories
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'create-event-category' %}" class="nav-link">
+                  <i class="far fa fa-edit nav-icon"></i>
+                  <p>Create Category</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'event-category-list' %}" class="nav-link">
+                  <i class="far fa fa-list nav-icon"></i>
+                  <p>Manage Categories</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          
+          <!-- Events Management -->
+          <li class="nav-item has-treeview menu-open">
+            <a href="#" class="nav-link">
+              <p>
+                Events
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'event-create' %}" class="nav-link">
+                  <p>Create Event</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'event-list' %}" class="nav-link">
+                  <p>Manage Events</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          
+          <!-- User Registrations -->
+          <li class="nav-item">
+            <a href="{% url 'join-event-list' %}" class="nav-link">
+              <p>Event Registrations</p>
+            </a>
+          </li>
+          
+          <!-- Public Access -->
+          <li class="nav-item">
+            <a href="{% url 'public-events' %}" class="nav-link">
+              <p>View Public Events</p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
