@@ -1,50 +1,8 @@
-{% load static %}
+{% load static %}{% load static %}
 
-<nav class="main-header navbar navbar-expand navbar-primary navbar-light" style="padding-left: 0;">
-    <!-- Left navbar links -->
-    <ul class="navbar-nav" style="margin-left: 0; padding-left: 0;">
-      {% if request.user.is_authenticated and not request.user.is_staff %}
-        <li class="nav-item" style="margin-left: 0;">
-          <a class="nav-link" href="{% url 'user-dashboard' %}" style="padding-left: 15px;">
-            <i class="fas fa-home"></i> My Dashboard
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'public-events' %}">
-            <i class="fas fa-calendar"></i> Browse Events
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'user-events' %}">
-            <i class="fas fa-list"></i> My Events
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'send-admin-message' %}">
-            <i class="fas fa-envelope"></i> Contact Admin
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-        </li>
-      {% else %}
-        <li class="nav-item" style="margin-left: 0;">
-          <a class="nav-link" data-widget="pushmenu" href="#" role="button" style="padding-left: 15px;"><i class="fas fa-bars"></i></a>
-        </li>
-      {% endif %}
-    </ul>
 
-    <!-- SEARCH FORM -->
-    <form class="form-inline ml-3">
-      <div class="input-group input-group-sm">
-        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-        <div class="input-group-append">
-          <button class="btn btn-navbar" type="submit">
-            <i class="fas fa-search"></i>
-          </button>
-        </div>
-      </div>
-    </form>
+
+<!-- Removed navigation bar --><!-- Removed navigation bar -->
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">

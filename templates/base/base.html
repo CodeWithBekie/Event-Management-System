@@ -1,74 +1,142 @@
-<!DOCTYPE html>
-<html lang="en">
-  {% load static %}
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
+<!DOCTYPE html><!DOCTYPE html>
 
-  <title>{% block title %} {% endblock title %}</title>
-  {% include 'base/header.html' %}
-  
-  {% block extrahead %}
+<html lang="en"><html lang="en">
 
-  {% endblock extrahead %}
-</head>
-<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
-<div class="wrapper">
-  <!-- Navbar -->
-  {% include 'base/navbar.html' %}
-  <!-- /.navbar -->
+  {% load static %}  {% load static %}
 
-  <!-- Main Sidebar Container -->
-  {% include 'base/sidebar.html' %}
+<head><head>
 
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <div class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h4 class="m-0 text-dark">Dashboard</h4>
-          </div><!-- /.col -->
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">{% block breadcrumb %} {% endblock breadcrumb %}</li>
-            </ol>
-          </div><!-- /.col -->
-        </div><!-- /.row -->
-      </div><!-- /.container-fluid -->
-    </div>
+  <meta charset="utf-8">  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta http-equiv="x-ua-compatible" content="ie=edge">  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+
+
+  <title>{% block title %} {% endblock title %}</title>  <title>{% block title %} {% endblock title %}</title>
+
+  {% include 'base/header.html' %}  {% include 'base/header.html' %}
+
+    
+
+  {% block extrahead %}  {% block extrahead %}
+
+
+
+  {% endblock extrahead %}  {% endblock extrahead %}
+
+</head></head>
+
+<body class="hold-transition sidebar-mini layout-fixed layout-footer-fixed"><body class="hold-transition sidebar-mini layout-fixed layout-footer-fixed">
+
+<div class="wrapper"><div class="wrapper">
+
+  <!-- Main Sidebar Container -->  <!-- Main Sidebar Container -->
+
+  {% include 'base/sidebar.html' %}  {% include 'base/sidebar.html' %}
+
+
+
+  <!-- Content Wrapper. Contains page content -->  <!-- Content Wrapper. Contains page content -->
+
+  <div class="content-wrapper">  <div class="content-wrapper">
+
+    <!-- Content Header (Page header) -->    <!-- Content Header (Page header) -->
+
+    <div class="content-header">    <div class="content-header">
+
+      <div class="container-fluid">      <div class="container-fluid">
+
+        <div class="row mb-2">        <div class="row mb-2">
+
+          <div class="col-sm-6">          <div class="col-sm-6">
+
+            <h1 class="m-0 text-dark">{% block page_title %}{% endblock page_title %}</h1>            <h4 class="m-0 text-dark">Dashboard</h4>
+
+          </div><!-- /.col -->          </div><!-- /.col -->
+
+          <div class="col-sm-6">          <div class="col-sm-6">
+
+            <ol class="breadcrumb float-sm-right">            <ol class="breadcrumb float-sm-right">
+
+              {% block breadcrumb %}              <li class="breadcrumb-item"><a href="#">Home</a></li>
+
+                            <li class="breadcrumb-item active">{% block breadcrumb %} {% endblock breadcrumb %}</li>
+
+              {% endblock breadcrumb %}            </ol>
+
+            </ol>          </div><!-- /.col -->
+
+          </div><!-- /.col -->        </div><!-- /.row -->
+
+        </div><!-- /.row -->      </div><!-- /.container-fluid -->
+
+      </div><!-- /.container-fluid -->    </div>
+
+    </div>    <!-- /.content-header -->
+
     <!-- /.content-header -->
 
     <!-- Main content -->
-    <section class="content">
-      <div class="container-fluid">
+
+    <!-- Main content -->    <section class="content">
+
+    <section class="content">      <div class="container-fluid">
+
+      <div class="container-fluid">        {% block content %}
+
         {% block content %}
 
-        {% endblock content %}
-      </div><!--/. container-fluid -->
-    </section>
-    <!-- /.content -->
-  </div>
+                {% endblock content %}
+
+        {% endblock content %}      </div><!--/. container-fluid -->
+
+      </div><!--/. container-fluid -->    </section>
+
+    </section>    <!-- /.content -->
+
+    <!-- /.content -->  </div>
+
+  </div>  <!-- /.content-wrapper -->
+
   <!-- /.content-wrapper -->
 
   <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Control sidebar content goes here -->
-  </aside>
+
+  <!-- Control Sidebar -->  <aside class="control-sidebar control-sidebar-dark">
+
+  <aside class="control-sidebar control-sidebar-dark">    <!-- Control sidebar content goes here -->
+
+    <!-- Control sidebar content goes here -->  </aside>
+
+  </aside>  <!-- /.control-sidebar -->
+
   <!-- /.control-sidebar -->
 
   <!-- Main Footer -->
-  {% include 'base/footer.html' %}
-</div>
+
+  <!-- Main Footer -->  {% include 'base/footer.html' %}
+
+  {% include 'base/footer.html' %}</div>
+
+</div><!-- ./wrapper -->
+
 <!-- ./wrapper -->
 
 {% include 'base/js.html' %}
-{% block extrascript %}
 
-{% endblock extrascript %}
+{% include 'base/js.html' %}{% block extrascript %}
+
+
+
+{% block extrajs %}{% endblock extrascript %}
+
+
+
+{% endblock extrajs %}</body>
+
+</html>
 
 </body>
 </html>
